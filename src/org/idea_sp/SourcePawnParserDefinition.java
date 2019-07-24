@@ -19,19 +19,17 @@ import org.idea_sp.psi.SourcePawnFile;
 import org.idea_sp.psi.SourcePawnTypes;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Reader;
-
 public class SourcePawnParserDefinition implements ParserDefinition {
-    public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-    public static final TokenSet COMMENTS = TokenSet.create(SourcePawnTypes.LINE_COMMENT, SourcePawnTypes.BLOCK_COMMENT, SourcePawnTypes.PREPROCESSOR_COMMENT);
-    public static final TokenSet STRING_LITERALS = TokenSet.create(SourcePawnTypes.STRING_LITERAL, SourcePawnTypes.CHARACTER_LITERAL);
+    private static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
+    private static final TokenSet COMMENTS = TokenSet.create(SourcePawnTypes.LINE_COMMENT, SourcePawnTypes.BLOCK_COMMENT, SourcePawnTypes.PREPROCESSOR_COMMENT);
+    private static final TokenSet STRING_LITERALS = TokenSet.create(SourcePawnTypes.STRING_LITERAL, SourcePawnTypes.CHARACTER_LITERAL);
 
-    public static final IFileElementType FILE = new IFileElementType(Language.<SourcePawnLanguage>findInstance(SourcePawnLanguage.class));
+    private static final IFileElementType FILE = new IFileElementType(Language.findInstance(SourcePawnLanguage.class));
  
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        return new FlexAdapter(new _SourcePawnLexer((Reader) null));
+        return new FlexAdapter(new SourcePawnLexer(null));
     }
  
     @NotNull
@@ -48,7 +46,7 @@ public class SourcePawnParserDefinition implements ParserDefinition {
     public TokenSet getStringLiteralElements() {
         return STRING_LITERALS;
     }
- 
+
     @NotNull
     public PsiParser createParser(final Project project) {
         return new SourcePawnParser();
@@ -62,8 +60,8 @@ public class SourcePawnParserDefinition implements ParserDefinition {
     public PsiFile createFile(FileViewProvider viewProvider) {
         return new SourcePawnFile(viewProvider);
     }
- 
-    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
+
+    public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
         return SpaceRequirements.MAY;
     }
  

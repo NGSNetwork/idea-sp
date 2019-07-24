@@ -5,12 +5,14 @@ import com.intellij.psi.tree.TokenSet;
 import static org.idea_sp.psi.SourcePawnTypes.*;
 
 public interface SourcePawnTokenTypeSets {
+    // comment types
     TokenSet COMMENTS = TokenSet.create(
             LINE_COMMENT,
             BLOCK_COMMENT,
             PREPROCESSOR_COMMENT
     );
 
+    // keywords
     TokenSet KEYWORDS = TokenSet.create(
             ASSERT_KEYWORD,
             BREAK_KEYWORD,
