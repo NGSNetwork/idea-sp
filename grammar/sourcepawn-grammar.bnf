@@ -1,16 +1,16 @@
 {
-  parserClass="net.neogenesisnetwork.sp.lang.SourcePawnParser"
+  parserClass="tf.ngs.sp.lang.SourcePawnParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="SourcePawn"
   psiImplClassSuffix="Impl"
-  psiPackage="net.neogenesisnetwork.sp.lang.psi"
-  psiImplPackage="net.neogenesisnetwork.sp.lang.psi.impl"
+  psiPackage="tf.ngs.sp.lang.psi"
+  psiImplPackage="tf.ngs.sp.lang.psi.impl"
 
-  elementTypeHolderClass="net.neogenesisnetwork.sp.lang.psi.SourcePawnTypes"
-  elementTypeClass="net.neogenesisnetwork.sp.lang.SourcePawnElementType"
-  tokenTypeClass="net.neogenesisnetwork.sp.lang.SourcePawnTokenType"
+  elementTypeHolderClass="tf.ngs.sp.lang.psi.SourcePawnTypes"
+  elementTypeClass="tf.ngs.sp.lang.SourcePawnElementType"
+  tokenTypeClass="tf.ngs.sp.lang.SourcePawnTokenType"
   generateFirstCheck=50
 
   tokens = [
@@ -101,6 +101,7 @@
     PUBLIC_KEYWORD="public"
     FUNCTAG_KEYWORD="functag"
     METHODMAP_KEYWORD="methodmap"
+    TYPEDEF_KEYWORD="typedef"
 
     // SourcePawn-specific keywords
     ENUM_KEYWORD="enum"
@@ -121,109 +122,112 @@
     character_literal="regexp:'(\\.|[^\"])'"
 
     // @ and _ are not themselves valid identifiers.
-    identifier="regexp:([@_a-zA-Z][@_a-zA-Z0-9]+|[a-zA-Z][@_a-zA-Z0-9]*)"
+    SYMBOL="regexp:([@_a-zA-Z][@_a-zA-Z0-9]+|[a-zA-Z][@_a-zA-Z0-9]*)"
 
 
     // Below is from an attempt to use dvander's grammar as a base
     // See https://wiki.alliedmods.net/SourcePawn_Transitional_Syntax#Grammar
-
-    // This is dvander's symbol. It doesn't handle all the edge cases Pawn allows (the one below it tries to)
-//    symbol="regexp:[A-Za-z_]([A-Za-z0-9_]*)"
   ]
 }
 
 root ::= root_item*
 private root_item ::= comment
-                      | global_assn SEMICOLON
-                      | methodmap
                       | function
+                      | global_assn
+                      | methodmap
                       | enum-struct
                       | typedef
 
-global_assn ::= global '=' literal
+global_assn ::= global EQ literal SEMICOLON
+                | global EQ struct_block SEMICOLON
+
+struct_block ::= LBRACE struct_decls* RBRACE
+
+struct_decls ::= SYMBOL EQ literal COMMA?
+            | SYMBOL EQ SYMBOL COMMA?
 
 comment ::= BLOCK_COMMENT | LINE_COMMENT
-//private blockComment ::= BLOCK_COMMENT_START (BLOCK_COMMENT_BODY | blockComment)* BLOCK_COMMENT_END
 
-function ::= (funcenumDeclaration | functagDeclaration | bareFunctionDeclaration | normalFunctionDeclaration) SEMICOLON?
+function ::= (normalFunctionDeclaration | funcenumDeclaration | functagDeclaration | bareFunctionDeclaration) SEMICOLON?
 
-private normalFunctionDeclaration ::= [PUBLIC_KEYWORD | STOCK_KEYWORD] builtin_type? identifier LPAREN functionParameterList? RPAREN functionBlock {pin=3}
-private bareFunctionDeclaration ::= (FORWARD_KEYWORD | NATIVE_KEYWORD) builtin_type? identifier LPAREN functionParameterList? RPAREN {pin=1}
+private normalFunctionDeclaration ::= global LPAREN functionParameterList? RPAREN block
+private bareFunctionDeclaration ::= global LPAREN functionParameterList? RPAREN SEMICOLON
 
-private functagDeclaration ::=  FUNCTAG_KEYWORD (OTHER_PUBLIC identifier | identifier identifier? PUBLIC_KEYWORD) BRACKET_PAREN_L functionParameterList? BRACKET_PAREN_R {pin=1}
+private functagDeclaration ::=  FUNCTAG_KEYWORD (OTHER_PUBLIC SYMBOL | SYMBOL SYMBOL? PUBLIC_KEYWORD) BRACKET_PAREN_L functionParameterList? BRACKET_PAREN_R
 
-functionParameterList ::= <<comma_list functionParameter>>
-functionParameter ::= [CONST_KEYWORD | AND] identifier? (ELLIPSIS | identifier (LBRACKET expression? RBRACKET)* vardecl?)
+functionParameterList ::= <<comma_list argdecl>>
 
-functionBlock ::= blockStatement | statement
+block ::= blockStatements?
 
-funcenumDeclaration ::= FUNCENUM_KEYWORD identifier LBRACE funcenumBlock RBRACE {pin=1}
+blockStatements ::= blockStatement*
+
+blockStatement ::= vardecl | statement
+
+statement ::= statementWithoutSubstatement | ifThen | <if then else statement> | <while statement> | <for statement>
+
+statementWithoutSubstatement ::= block | <expression statement> | <switch statement> | <do statement> | <break statement> | <continue statement> | <return statement> | <synchronized statement> | <throws statements> | <try statement> | empty
+
+ifThen ::= IF_KEYWORD LPAREN expr RPAREN statement
+
+ifThenElse ::= IF_KEYWORD LPAREN expr RPAREN statement ELSE_KEYWORD statement
+
+empty ::=
+
+funcenumDeclaration ::= FUNCENUM_KEYWORD SYMBOL LBRACE funcenumBlock RBRACE
 funcenumBlock ::= <<optional_comma_list funcenumBlockDeclaration>>
-funcenumBlockDeclaration ::= identifier? PUBLIC_KEYWORD LPAREN functionParameterList? RPAREN {pin=2}
+funcenumBlockDeclaration ::= SYMBOL? PUBLIC_KEYWORD LPAREN functionParameterList? RPAREN
 
 meta comma_list ::= <<param>> (SYNTAX_COMMA <<param>>)*
 meta optional_comma_list ::= <<param>> (SYNTAX_COMMA <<param>>)* SYNTAX_COMMA?
 
-return_type ::= return_old | return_new
-return_new ::= type_expr new_dims?        // Note, dims not yet supported.
-return_old ::= old_dims? label?
+return_type ::= return_new
+return_new ::= type_expr new_dims?
 
-argdecl ::= arg_old | arg_new
-arg_new ::= "const"? type_expr '&'? SYMBOL old_dims? ('=' arg_init)?
-arg_old ::= "const"? tags? '&'? SYMBOL old_dims? ('=' arg_init)?
+argdecl ::= arg_new
+arg_new ::= CONST_KEYWORD? type_expr '&'? SYMBOL old_dims? ('=' arg_init)?
 arg_init ::= literal | SYMBOL
 
-vardecl ::= var_old | var_new
+vardecl ::= var_new
 var_new ::= var_new_prefix type_expr SYMBOL old_dims?
-var_new_prefix ::= "static" | "const"
-var_old ::= var_old_prefix tag? SYMBOL old_dims?
-var_old_prefix ::= "new" | "decl" | "static" | "const"
+var_new_prefix ::= STATIC_KEYWORD | CONST_KEYWORD
 
-global ::= global_old | global_new
-global_new ::= storage_class* type_expr SYMBOL old_dims?
-global_old ::= storage_class* tag? SYMBOL old_dims?
+global ::= storage_class* type_expr SYMBOL new_dims?
 
 storage_class ::= PUBLIC_KEYWORD | STATIC_KEYWORD | CONST_KEYWORD | STOCK_KEYWORD
 
 type_expr ::= (builtin_type | SYMBOL) new_dims?
 builtin_type ::= VOID_KEYWORD | INT_KEYWORD | FLOAT_KEYWORD | CHAR_KEYWORD | BOOL_KEYWORD | ANY_KEYWORD
 
-tags ::= tag_vector | tag
-tag_vector ::= LBRACE SYMBOL (',' SYMBOL)* RBRACE COLON
-tag ::= label
-
 new_dims ::= ('[' ']')*
 old_dims ::= ('[' expr? ']')+
-
-label ::= SYMBOL ':'
 
 literal ::= number | string_literal | character_literal
 number ::= integer_literal | hex_literal | float_literal
 
 visibility ::= PUBLIC_KEYWORD
-method-args ::= arg_new* "..."?
+method-args ::= arg_new* ELLIPSIS?
 
-methodmap ::= METHODMAP_KEYWORD SYMBOL? { methodmap-item* } term
+methodmap ::= METHODMAP_KEYWORD SYMBOL? LBRACE methodmap-item* RBRACE SEMICOLON?
 methodmap-item ::=
-           visibility "~"? SYMBOL "(" ")" "=" SYMBOL term
-        | visibility "native" type_expr "~"? SYMBOL methodmap_symbol "(" method-args ")" term
-        | visibility type_expr SYMBOL "(" method-args ")" func-body term
-        | "property" type_expr SYMBOL { property-decl } term
+           visibility "~"? SYMBOL LPAREN RPAREN "=" SYMBOL term
+        | visibility "native" type_expr "~"? SYMBOL methodmap_symbol LPAREN method-args RPAREN
+        | visibility type_expr SYMBOL LPAREN method-args RPAREN func-body
+        | "property" type_expr SYMBOL { property-decl }
 property-func ::= "get" | "set"
 property-decl ::= visibility property-impl
 property-impl ::=
-           "native" property-func "(" ")" term
-         | property-func "(" ")" func-body term
-         | property-func "(" ")" "=" SYMBOL
+           "native" property-func LPAREN RPAREN
+         | property-func LPAREN RPAREN func-body
+         | property-func LPAREN RPAREN "=" SYMBOL
 
 enum-struct ::= ENUM_KEYWORD STRUCT_KEYWORD SYMBOL LBRACE SPACE? enum-struct-entry enum-struct-entry* RBRACE SEMICOLON?
 enum-struct-entry ::= enum-struct-field
                     | enum-struct-method
-enum-struct-field ::= type_expr SYMBOL old_dims? term
-enum-struct-method ::= type_expr SYMBOL "(" method-args ")" functionBlock SEMICOLON?
+enum-struct-field ::= type_expr SYMBOL old_dims?
+enum-struct-method ::= type_expr SYMBOL LPAREN method-args RPAREN functionBlock SEMICOLON?
 
-typedef ::= "typedef" SYMBOL "=" full-type-expr term
-full-type-expr ::= "(" type_expr ")"
+typedef ::= TYPEDEF_KEYWORD SYMBOL EQ full-type-expr
+full-type-expr ::= LPAREN type_expr RPAREN
                  | type_expr
-//typedef-args ::= "..."
-//               | typedef-arg (", " "...")?
+//typedef-args ::= ELLIPSIS
+//               | typedef-arg (", " ELLIPSIS)?

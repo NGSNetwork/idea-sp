@@ -1,7 +1,7 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.openapi.fileTypes.*
-import net.neogenesisnetwork.sp.lang.SourcePawnFileType
+import tf.ngs.sp.lang.SourcePawnFileType
 
 class SourcePawnFileTypeFactory : FileTypeFactory() {
     override fun createFileTypes(fileTypeConsumer: FileTypeConsumer) {

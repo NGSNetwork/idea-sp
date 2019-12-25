@@ -1,4 +1,4 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.lexer.FlexAdapter
 import com.intellij.lexer.Lexer
@@ -6,13 +6,13 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
-import net.neogenesisnetwork.sp.lang.psi.SourcePawnTypes
+import tf.ngs.sp.lang.psi.SourcePawnTypes
 
 import java.util.HashMap
 
 import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey
-import net.neogenesisnetwork.sp.lang.SourcePawnTokenTypeSets.Companion.COMMENTS
-import net.neogenesisnetwork.sp.lang.SourcePawnTokenTypeSets.Companion.KEYWORDS
+import tf.ngs.sp.lang.SourcePawnTokenTypeSets.Companion.COMMENTS
+import tf.ngs.sp.lang.SourcePawnTokenTypeSets.Companion.KEYWORDS
 
 class SourcePawnSyntaxHighlighter : SyntaxHighlighterBase() {
 

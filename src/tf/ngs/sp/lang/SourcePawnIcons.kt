@@ -1,4 +1,4 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.openapi.util.IconLoader
 

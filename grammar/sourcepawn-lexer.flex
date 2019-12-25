@@ -1,10 +1,10 @@
-package net.neogenesisnetwork.sp.lang;
+package tf.ngs.sp.lang;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.TokenType;
 import com.intellij.util.containers.*;
-import net.neogenesisnetwork.sp.lang.psi.SourcePawnTypes;
+import tf.ngs.sp.lang.psi.SourcePawnTypes;
 
 %%
 
@@ -37,7 +37,6 @@ BINARY_LITERAL=[-+]?0b[01_]+
 STRING_LITERAL=\"(\\.|[^\"])*\"
 CHARACTER_LITERAL='(\\.|[^\"])'
 SYMBOL=([@_a-zA-Z][@_a-zA-Z0-9]+|[a-zA-Z][@_a-zA-Z0-9]*)
-//SYMBOL=[A-Za-z_]([A-Za-z0-9_]*)
 
 EQ="="
 EXCL="!"

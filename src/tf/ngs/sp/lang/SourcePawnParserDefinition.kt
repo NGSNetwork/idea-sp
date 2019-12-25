@@ -1,4 +1,4 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
@@ -10,8 +10,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import net.neogenesisnetwork.sp.lang.psi.SourcePawnFile
-import net.neogenesisnetwork.sp.lang.psi.SourcePawnTypes
+import tf.ngs.sp.lang.psi.SourcePawnFile
+import tf.ngs.sp.lang.psi.SourcePawnTypes
 
 class SourcePawnParserDefinition : ParserDefinition {
 

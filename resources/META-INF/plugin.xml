@@ -1,18 +1,18 @@
-<idea-plugin url="https://www.neogenesisnetwork.net">
+<idea-plugin url="https://ngs.tf">
     <name>SourcePawn</name>
-    <id>net.neogenesisnetwork.lang.SourcePawn</id>
+    <id>tf.ngs.lang.SourcePawn</id>
     <description>Adds language support for SourcePawn, a language used for plugin development with the Sourcemod framework.
     </description>
     <change-notes>First shot at making this plugin, based on y4kman's awesome Flex work.</change-notes>
     <version>0.0.1</version>
-    <vendor url="https://www.neogenesisnetwork.net">Neogenesis Network</vendor>
+    <vendor url="https://ngs.tf">Neogenesis Network</vendor>
     <idea-version since-build="173.0"/>
     <depends>com.intellij.modules.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <fileTypeFactory implementation="net.neogenesisnetwork.sp.lang.SourcePawnFileTypeFactory"/>
-        <lang.parserDefinition language="SourcePawn" implementationClass="net.neogenesisnetwork.sp.lang.SourcePawnParserDefinition"/>
-        <colorSettingsPage implementation="net.neogenesisnetwork.sp.lang.SourcePawnColorSettingsPage"/>
-        <syntaxHighlighter factoryClass="net.neogenesisnetwork.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
-        <lang.syntaxHighlighterFactory language="SourcePawn" implementationClass="net.neogenesisnetwork.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
+        <fileTypeFactory implementation="tf.ngs.sp.lang.SourcePawnFileTypeFactory"/>
+        <lang.parserDefinition language="SourcePawn" implementationClass="tf.ngs.sp.lang.SourcePawnParserDefinition"/>
+        <colorSettingsPage implementation="tf.ngs.sp.lang.SourcePawnColorSettingsPage"/>
+        <syntaxHighlighter factoryClass="tf.ngs.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="SourcePawn" implementationClass="tf.ngs.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
     </extensions>
 </idea-plugin>

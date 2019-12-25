@@ -1,9 +1,9 @@
-package net.neogenesisnetwork.sp.lang.psi
+package tf.ngs.sp.lang.psi
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.psi.FileViewProvider
-import net.neogenesisnetwork.sp.lang.SourcePawnFileType
-import net.neogenesisnetwork.sp.lang.SourcePawnLanguage
+import tf.ngs.sp.lang.SourcePawnFileType
+import tf.ngs.sp.lang.SourcePawnLanguage
 
 class SourcePawnFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, SourcePawnLanguage.INSTANCE) {
     override fun getFileType() = SourcePawnFileType

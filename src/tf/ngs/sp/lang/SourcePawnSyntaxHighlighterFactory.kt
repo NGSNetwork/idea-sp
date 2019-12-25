@@ -1,9 +1,9 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import net.neogenesisnetwork.sp.lang.SourcePawnSyntaxHighlighter
+import tf.ngs.sp.lang.SourcePawnSyntaxHighlighter
 
 
 class SourcePawnSyntaxHighlighterFactory : SyntaxHighlighterFactory() {

@@ -21,10 +21,10 @@ val commitHash by lazy {
 val isCI = !System.getenv("CI").isNullOrBlank()
 
 val pluginComingVersion = "0.0.1"
-val packageName = "net.neogenesisnetwork.sp"
-val ideaVersion = "2019.2"
-val customSinceBuild = "172.3317.76"
-val customUntilBuild = "191.*"
+val packageName = "tf.ngs.sp"
+val ideaVersion = "2019.3"
+val customSinceBuild = "193.4386"
+val customUntilBuild = "201.*"
 val buildNumber = "SNAPSHOT"
 val pluginVersion = pluginComingVersion
 
@@ -32,9 +32,9 @@ group = packageName
 version = pluginVersion
 plugins {
     java
-    id("org.jetbrains.intellij") version "0.4.8"
-    id("org.jetbrains.grammarkit") version "2019.1"
-    kotlin("jvm") version "1.3.30"
+    id("org.jetbrains.intellij") version "0.4.15"
+    id("org.jetbrains.grammarkit") version "2019.3"
+    kotlin("jvm") version "1.3.61"
 }
 
 fun fromToolbox(root: String, ide: String) = file(root)
@@ -57,19 +57,6 @@ allprojects {
     intellij {
         updateSinceUntilBuild = false
         instrumentCode = true
-//        val user = System.getProperty("user.name")
-//        val os = System.getProperty("os.name")
-//        val root = when {
-//            os.startsWith("Windows") -> "C:\\Users\\$user\\AppData\\Local\\JetBrains\\Toolbox\\apps"
-//            os == "Linux" -> "/home/$user/.local/share/JetBrains/Toolbox/apps"
-//            else -> return@intellij
-//        }
-//        val intellijPath = sequenceOf("IDEA-C-JDK11", "IDEA-C", "IDEA-JDK11", "IDEA-U")
-//                .mapNotNull { fromToolbox(root, it) }.firstOrNull()
-//        intellijPath?.absolutePath?.let { localPath = it }
-//        val pycharmPath = sequenceOf("PyCharm-C", "IDEA-C-JDK11", "IDEA-C", "IDEA-JDK11", "IDEA-U")
-//                .mapNotNull { fromToolbox(root, it) }.firstOrNull()
-//        pycharmPath?.absolutePath?.let { alternativeIdePath = it }
         version = "2019.1"
     }
 }
@@ -80,8 +67,6 @@ java {
 }
 
 tasks.withType<PatchPluginXmlTask> {
-    //    changeNotes(file("res/META-INF/change-notes.html").readText())
-//    pluginDescription(file("res/META-INF/description.html").readText())
     version(pluginVersion)
     pluginId(packageName)
     println(pluginId)
@@ -102,11 +87,6 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
-//    compile("org.eclipse.mylyn.github", "org.eclipse.egit.github.core", "2.1.5") {
-//        exclude(module = "gson")
-//    }
-//    testCompile(kotlin("test-junit"))
-//    testCompile("junit", "junit", "4.12")
 }
 
 task("displayCommitHash") {
@@ -126,8 +106,8 @@ task("isCI") {
 }
 
 // Don't specify type explicitly. Will be incorrectly recognized
-val parserRoot = Paths.get("net", "neogenesisnetwork", "sp", "lang")
-val lexerRoot = Paths.get("gen", "net", "neogenesisnetwork", "sp", "lang")
+val parserRoot = Paths.get("gen", "tf", "ngs", "sp", "lang")
+val lexerRoot = Paths.get("gen", "tf", "ngs", "sp", "lang")
 fun path(more: Iterable<*>) = more.joinToString(File.separator)
 fun bnf(name: String) = Paths.get("grammar", "$name-grammar.bnf").toString()
 fun flex(name: String) = Paths.get("grammar", "$name-lexer.flex").toString()
@@ -150,25 +130,6 @@ val genLexer = task<GenerateLexer>("genLexer") {
     targetClass = "SourcePawnLexer"
     purgeOldFiles = true
 }
-
-//val genParser = task<GenerateParser>("genParser") {
-//    group = tasks["init"]!!.group!!
-//    description = "Generate the Parser and PsiElement classes"
-//    source = "src/org/idea_sp/grammar/SourcePawn.bnf"
-//    targetRoot = "gen"
-//    pathToParser = "org/idea_sp/parser/SourcePawnParser.java"
-//    pathToPsiRoot = "src/org/idea_sp/psi"
-//    purgeOldFiles = true
-//}
-//
-//val genLexer = task<GenerateLexer>("genLexer") {
-//    group = genParser.group
-//    description = "Generate the Lexer"
-//    source = "src/org/idea_sp/grammar/SourcePawn.flex"
-//    targetDir = "gen/org/idea_sp/"
-//    targetClass = "SourcePawnLexer"
-//    purgeOldFiles = true
-//}
 
 val cleanGenerated = task("cleanGenerated") {
     group = tasks["clean"].group

@@ -1,7 +1,7 @@
-package net.neogenesisnetwork.sp.lang
+package tf.ngs.sp.lang
 
 import com.intellij.psi.tree.TokenSet
-import net.neogenesisnetwork.sp.lang.psi.SourcePawnTypes.*
+import tf.ngs.sp.lang.psi.SourcePawnTypes.*
 
 interface SourcePawnTokenTypeSets {
     companion object {
