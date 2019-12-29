@@ -1,4 +1,5 @@
 {
+  generate=[java="8" names="long" visitor-value="R"]
   parserClass="tf.ngs.sp.lang.SourcePawnParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
@@ -12,6 +13,8 @@
   elementTypeClass="tf.ngs.sp.lang.SourcePawnElementType"
   tokenTypeClass="tf.ngs.sp.lang.SourcePawnTokenType"
   generateFirstCheck=50
+
+  consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
 
   tokens = [
     EQ="="
@@ -45,6 +48,8 @@
     LE="<="
     LTLT="<<"
     GT=">"
+    GE=">="
+    GTGT=">>"
     AND="&"
     ANDAND="&&"
     PLUSEQ="+="
@@ -74,6 +79,7 @@
     STATE_KEYWORD="state"
     SWITCH_KEYWORD="switch"
     WHILE_KEYWORD="while"
+    DELETE_KEYWORD="delete"
 
     DEFINED_KEYWORD="defined"
     SIZEOF_KEYWORD="sizeof"
@@ -102,6 +108,8 @@
     FUNCTAG_KEYWORD="functag"
     METHODMAP_KEYWORD="methodmap"
     TYPEDEF_KEYWORD="typedef"
+    GET_KEYWORD="get"
+    SET_KEYWORD="set"
 
     // SourcePawn-specific keywords
     ENUM_KEYWORD="enum"
@@ -117,6 +125,7 @@
     float_literal="regexp:[-+]?\d[_\d]*\.\d[_\d]*(e[-+]?\d+)?"
     hex_literal="regexp:[-+]?0x[a-fA-F0-9_]+"
     binary_literal="regexp:[-+]?0b[01_]+"
+    bool_literal="regexp:(true|false)"
 
     string_literal="regexp:\"(\\.|[^\"])*\""
     character_literal="regexp:'(\\.|[^\"])'"
@@ -128,6 +137,8 @@
     // Below is from an attempt to use dvander's grammar as a base
     // See https://wiki.alliedmods.net/SourcePawn_Transitional_Syntax#Grammar
   ]
+
+  extends(".*_expr_r")=expr
 }
 
 root ::= root_item*
@@ -138,13 +149,11 @@ private root_item ::= comment
                       | enum-struct
                       | typedef
 
-global_assn ::= global EQ literal SEMICOLON
-                | global EQ struct_block SEMICOLON
+global_assn ::= global (EQ (literal_expr_r | struct_block))? SEMICOLON
 
 struct_block ::= LBRACE struct_decls* RBRACE
 
-struct_decls ::= SYMBOL EQ literal COMMA?
-            | SYMBOL EQ SYMBOL COMMA?
+struct_decls ::= SYMBOL EQ (literal_expr_r | SYMBOL) COMMA?
 
 comment ::= BLOCK_COMMENT | LINE_COMMENT
 
@@ -157,51 +166,90 @@ private functagDeclaration ::=  FUNCTAG_KEYWORD (OTHER_PUBLIC SYMBOL | SYMBOL SY
 
 functionParameterList ::= <<comma_list argdecl>>
 
-block ::= blockStatements?
-
-blockStatements ::= blockStatement*
+block ::= LBRACE blockStatement* RBRACE
 
 blockStatement ::= vardecl | statement
 
-statement ::= statementWithoutSubstatement | ifThen | <if then else statement> | <while statement> | <for statement>
+statement ::= statementWithoutSubstatement SEMICOLON | block | returnStatement SEMICOLON | varAssignment SEMICOLON | expr SEMICOLON | switchStatement | doWhileStatement SEMICOLON | ifThenElse | ifThen | whileStatement | forStatement | deleteStatement
 
-statementWithoutSubstatement ::= block | <expression statement> | <switch statement> | <do statement> | <break statement> | <continue statement> | <return statement> | <synchronized statement> | <throws statements> | <try statement> | empty
+statementWithoutSubstatement ::= BREAK_KEYWORD | CONTINUE_KEYWORD
 
 ifThen ::= IF_KEYWORD LPAREN expr RPAREN statement
 
 ifThenElse ::= IF_KEYWORD LPAREN expr RPAREN statement ELSE_KEYWORD statement
 
-empty ::=
+whileStatement ::= WHILE_KEYWORD LPAREN expr RPAREN statement
+
+doWhileStatement ::= DO_KEYWORD statement WHILE_KEYWORD LPAREN expr RPAREN
+
+forStatement ::= FOR_KEYWORD LPAREN (expr SEMICOLON | vardecl | SEMICOLON) expr? SEMICOLON expr? RPAREN block
+
+switchStatement ::= SWITCH_KEYWORD LPAREN expr RPAREN LBRACE switchCase+ defaultSwitchCase RBRACE
+
+deleteStatement ::= DELETE_KEYWORD expr SEMICOLON
+
+returnStatement ::= RETURN_KEYWORD expr?
+
+varAssignment ::= SYMBOL varAssignmentOp expr
+
+varAssignmentOp ::= PLUSEQ | MINUSEQ | GTGTEQ | LTLTEQ | ASTERISKEQ | DIVEQ
+
+switchCase ::= CASE_KEYWORD expr COLON block
+
+defaultSwitchCase ::= DEFAULT_KEYWORD COLON block
+
+expr ::= call_expr_r | ternary_expr_r | parened_expr_r | binop_expr_r | unop_expr_r | literal_expr_r | term_expr_r | index_expr_r
+
+ternary_expr_r ::= expr QUEST expr COLON expr
+
+index_expr_r ::= expr LBRACKET expr RBRACKET
+
+binop_expr_r ::= expr binop expr
+
+call_expr_r ::= SYMBOL LPAREN <<comma_list expr>>? RPAREN
+
+binop ::= OROR | ANDAND | EQEQ | NE | LE | LTLT | LT | GE | GTGT | GT | EQ | PLUS | MINUS | ASTERISK | DIV | PERC | DOT
+
+unop_expr_r ::= increm_expr_r | PLUS expr | MINUS expr | EXCL expr | SIZEOF_KEYWORD LPAREN expr RPAREN
+
+increm_expr_r ::= pre_increm_expr_r | post_increm_expr_r
+
+pre_increm_expr_r ::= PLUSPLUS SYMBOL | MINUSMINUS SYMBOL
+
+post_increm_expr_r ::= SYMBOL PLUSPLUS | SYMBOL MINUSMINUS
+
+parened_expr_r ::= LPAREN expr RPAREN
+
+term_expr_r ::= SYMBOL
 
 funcenumDeclaration ::= FUNCENUM_KEYWORD SYMBOL LBRACE funcenumBlock RBRACE
 funcenumBlock ::= <<optional_comma_list funcenumBlockDeclaration>>
 funcenumBlockDeclaration ::= SYMBOL? PUBLIC_KEYWORD LPAREN functionParameterList? RPAREN
 
-meta comma_list ::= <<param>> (SYNTAX_COMMA <<param>>)*
-meta optional_comma_list ::= <<param>> (SYNTAX_COMMA <<param>>)* SYNTAX_COMMA?
+meta comma_list ::= <<param>> (COMMA <<param>>)*
+meta optional_comma_list ::= <<param>> (COMMA <<param>>)* COMMA?
 
 return_type ::= return_new
-return_new ::= type_expr new_dims?
+return_new ::= type_expr old_dims?
 
 argdecl ::= arg_new
-arg_new ::= CONST_KEYWORD? type_expr '&'? SYMBOL old_dims? ('=' arg_init)?
+arg_new ::= CONST_KEYWORD? type_expr AND? SYMBOL old_dims? (EQ arg_init)?
 arg_init ::= literal | SYMBOL
 
-vardecl ::= var_new
-var_new ::= var_new_prefix type_expr SYMBOL old_dims?
-var_new_prefix ::= STATIC_KEYWORD | CONST_KEYWORD
+vardecl ::= var_prefix? type_expr? SYMBOL old_dims? (EQ NEW_KEYWORD? expr)? (COMMA SYMBOL old_dims? (EQ NEW_KEYWORD? expr)?)* SEMICOLON
+var_prefix ::= STATIC_KEYWORD | CONST_KEYWORD
 
-global ::= storage_class* type_expr SYMBOL new_dims?
+global ::= storage_class* type_expr new_dims? SYMBOL
 
-storage_class ::= PUBLIC_KEYWORD | STATIC_KEYWORD | CONST_KEYWORD | STOCK_KEYWORD
+storage_class ::= PUBLIC_KEYWORD | STATIC_KEYWORD | CONST_KEYWORD | STOCK_KEYWORD | NATIVE_KEYWORD
 
 type_expr ::= (builtin_type | SYMBOL) new_dims?
 builtin_type ::= VOID_KEYWORD | INT_KEYWORD | FLOAT_KEYWORD | CHAR_KEYWORD | BOOL_KEYWORD | ANY_KEYWORD
 
-new_dims ::= ('[' ']')*
-old_dims ::= ('[' expr? ']')+
+new_dims ::= (LBRACKET RBRACKET)*
+old_dims ::= (LBRACKET expr? RBRACKET)+
 
-literal ::= number | string_literal | character_literal
+literal_expr_r ::= number | bool_literal | string_literal | character_literal
 number ::= integer_literal | hex_literal | float_literal
 
 visibility ::= PUBLIC_KEYWORD
@@ -209,11 +257,11 @@ method-args ::= arg_new* ELLIPSIS?
 
 methodmap ::= METHODMAP_KEYWORD SYMBOL? LBRACE methodmap-item* RBRACE SEMICOLON?
 methodmap-item ::=
-           visibility "~"? SYMBOL LPAREN RPAREN "=" SYMBOL term
-        | visibility "native" type_expr "~"? SYMBOL methodmap_symbol LPAREN method-args RPAREN
+           visibility TILDE? SYMBOL LPAREN RPAREN EQ SYMBOL SEMICOLON
+        | visibility NATIVE_KEYWORD type_expr TILDE? SYMBOL methodmap_symbol LPAREN method-args RPAREN
         | visibility type_expr SYMBOL LPAREN method-args RPAREN func-body
         | "property" type_expr SYMBOL { property-decl }
-property-func ::= "get" | "set"
+property-func ::= GET_KEYWORD | SET_KEYWORD
 property-decl ::= visibility property-impl
 property-impl ::=
            "native" property-func LPAREN RPAREN

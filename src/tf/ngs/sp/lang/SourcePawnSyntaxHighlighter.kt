@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
-import tf.ngs.sp.lang.psi.SourcePawnTypes
 
 import java.util.HashMap
 
@@ -37,8 +36,8 @@ class SourcePawnSyntaxHighlighter : SyntaxHighlighterBase() {
         private val ATTRIBUTES = HashMap<IElementType, TextAttributesKey>()
 
         init {
-            ATTRIBUTES[SourcePawnTypes.EQ] = OPERATOR
-            ATTRIBUTES[SourcePawnTypes.LITERAL] = LITERAL
+//            ATTRIBUTES[SourcePawnTypes.EQ] = OPERATOR
+//            ATTRIBUTES[SourcePawnTypes.LITERAL] = LITERAL
 
             fillMap(ATTRIBUTES, KEYWORDS, RESERVED)
             fillMap(ATTRIBUTES, COMMENTS, COMMENT)

@@ -69,6 +69,7 @@ LT="<"
 LE="<="
 LTLT="<<"
 GT=">"
+GTGT=">>"
 AND="&"
 ANDAND="&&"
 PLUSEQ="+="
@@ -193,6 +194,8 @@ STRUCT_KEYWORD="struct"
   "<="                        { return SourcePawnTypes.LE; }
   "<<"                        { return SourcePawnTypes.LTLT; }
   ">"                         { return SourcePawnTypes.GT; }
+  ">="                        { return SourcePawnTypes.GE; }
+  ">>"                        { return SourcePawnTypes.GTGT; }
   "&"                         { return SourcePawnTypes.AND; }
   "&&"                        { return SourcePawnTypes.ANDAND; }
   "+="                        { return SourcePawnTypes.PLUSEQ; }
@@ -236,6 +239,13 @@ STRUCT_KEYWORD="struct"
   "enum"                      { return SourcePawnTypes.ENUM_KEYWORD; }
   "struct"                    { return SourcePawnTypes.STRUCT_KEYWORD; }
   "expr"                      { return SourcePawnTypes.EXPR; }
+
+  "char"                      { return SourcePawnTypes.CHAR_KEYWORD; }
+  "int"                       { return SourcePawnTypes.INT_KEYWORD; }
+  "bool"                      { return SourcePawnTypes.BOOL_KEYWORD; }
+  "float"                     { return SourcePawnTypes.FLOAT_KEYWORD; }
+  "void"                      { return SourcePawnTypes.VOID_KEYWORD; }
+  "any"                       { return SourcePawnTypes.ANY_KEYWORD; }
 
   {SPACE}                     { return SourcePawnTypes.SPACE; }
   {INTEGER_LITERAL}           { return SourcePawnTypes.INTEGER_LITERAL; }
