@@ -118,6 +118,9 @@
     ENUM_KEYWORD="enum"
     STRUCT_KEYWORD="struct"
 
+    TRUE_KEYWORD="true"
+    FALSE_KEYWORD="false"
+
     SPACE="regexp:[ \n\r\t\f]"
 
     line_comment="regexp://[^\r\n]*"
@@ -128,7 +131,6 @@
     float_literal="regexp:[-+]?\d[_\d]*\.\d[_\d]*(e[-+]?\d+)?"
     hex_literal="regexp:[-+]?0x[a-fA-F0-9_]+"
     binary_literal="regexp:[-+]?0b[01_]+"
-    bool_literal="regexp:(true|false)"
 
     string_literal="regexp:\"(\\.|[^\"])*\""
     character_literal="regexp:'(\\.|[^\"])'"
@@ -154,7 +156,7 @@ private root_item ::= comment
                       | using
                       | typedef
 
-global_assn ::= global (EQ (literal_expr_r | struct_block | literal_list_block))? SEMICOLON
+global_assn ::= global ((EQ (literal_expr_r SEMICOLON | struct_block | literal_list_block SEMICOLON)) | SEMICOLON)
 
 struct_block ::= LBRACE struct_decls* RBRACE
 
@@ -242,7 +244,7 @@ return_new ::= type_expr old_dims?
 
 argdecl ::= arg_new
 arg_new ::= CONST_KEYWORD? type_expr AND? SYMBOL old_dims? (EQ arg_init)?
-arg_init ::= literal | SYMBOL
+arg_init ::= literal_expr_r | SYMBOL
 
 vardecl ::= var_prefix* type_expr? SYMBOL old_dims? (EQ NEW_KEYWORD? expr)? (COMMA SYMBOL old_dims? (EQ NEW_KEYWORD? expr)?)* SEMICOLON
 var_prefix ::= STATIC_KEYWORD | CONST_KEYWORD
@@ -263,6 +265,7 @@ old_dims ::= (LBRACKET expr RBRACKET)+
 
 literal_expr_r ::= number | bool_literal | string_literal | character_literal
 number ::= integer_literal | hex_literal | float_literal
+bool_literal ::= TRUE_KEYWORD | FALSE_KEYWORD
 
 visibility ::= PUBLIC_KEYWORD
 method-args ::= arg_new* ELLIPSIS?

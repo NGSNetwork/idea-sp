@@ -14,5 +14,6 @@
         <colorSettingsPage implementation="tf.ngs.sp.lang.SourcePawnColorSettingsPage"/>
         <syntaxHighlighter factoryClass="tf.ngs.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
         <lang.syntaxHighlighterFactory language="SourcePawn" implementationClass="tf.ngs.sp.lang.SourcePawnSyntaxHighlighterFactory"/>
+        <configurationType implementation="tf.ngs.sp.lang.run.SourcePawnRunConfigurationType"/>
     </extensions>
 </idea-plugin>

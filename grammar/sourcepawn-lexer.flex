@@ -132,6 +132,9 @@ STRUCT_KEYWORD="struct"
 USING_KEYWORD="using"
 PROPERTY_KEYWORD="property"
 
+TRUE_KEYWORD="true"
+FALSE_KEYWORD="false"
+
 //SPACE="regexp:[ \n\r\t\f]"
 
 //line_comment="regexp://[^\r\n]*"
