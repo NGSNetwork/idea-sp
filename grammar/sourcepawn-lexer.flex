@@ -129,6 +129,8 @@ FUNCTAG_KEYWORD="functag"
 // SourcePawn-specific keywords
 ENUM_KEYWORD="enum"
 STRUCT_KEYWORD="struct"
+USING_KEYWORD="using"
+PROPERTY_KEYWORD="property"
 
 //SPACE="regexp:[ \n\r\t\f]"
 

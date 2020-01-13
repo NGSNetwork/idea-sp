@@ -17,6 +17,7 @@
   consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
 
   tokens = [
+    space='regexp:\s+'
     EQ="="
     EXCL="!"
     TILDE="~"
@@ -94,6 +95,7 @@
     PUBLIC_KEYWORD="public"
     STATIC_KEYWORD="static"
     STOCK_KEYWORD="stock"
+    USING_KEYWORD="using"
 
     CHAR_KEYWORD="char"
     INT_KEYWORD="int"
@@ -107,6 +109,7 @@
     PUBLIC_KEYWORD="public"
     FUNCTAG_KEYWORD="functag"
     METHODMAP_KEYWORD="methodmap"
+    PROPERTY_KEYWORD="property"
     TYPEDEF_KEYWORD="typedef"
     GET_KEYWORD="get"
     SET_KEYWORD="set"
@@ -147,20 +150,24 @@ private root_item ::= comment
                       | global_assn
                       | methodmap
                       | enum-struct
+                      | enum-block
+                      | using
                       | typedef
 
-global_assn ::= global (EQ (literal_expr_r | struct_block))? SEMICOLON
+global_assn ::= global (EQ (literal_expr_r | struct_block | literal_list_block))? SEMICOLON
 
 struct_block ::= LBRACE struct_decls* RBRACE
 
 struct_decls ::= SYMBOL EQ (literal_expr_r | SYMBOL) COMMA?
 
+literal_list_block ::= LBRACE <<comma_list literal_expr_r>> RBRACE
+
 comment ::= BLOCK_COMMENT | LINE_COMMENT
 
-function ::= (normalFunctionDeclaration | funcenumDeclaration | functagDeclaration | bareFunctionDeclaration) SEMICOLON?
+function ::= normalFunctionDeclaration | funcenumDeclaration | functagDeclaration | bareFunctionDeclaration SEMICOLON
 
 private normalFunctionDeclaration ::= global LPAREN functionParameterList? RPAREN block
-private bareFunctionDeclaration ::= global LPAREN functionParameterList? RPAREN SEMICOLON
+private bareFunctionDeclaration ::= (FORWARD_KEYWORD)? global LPAREN functionParameterList? RPAREN
 
 private functagDeclaration ::=  FUNCTAG_KEYWORD (OTHER_PUBLIC SYMBOL | SYMBOL SYMBOL? PUBLIC_KEYWORD) BRACKET_PAREN_L functionParameterList? BRACKET_PAREN_R
 
@@ -192,13 +199,13 @@ returnStatement ::= RETURN_KEYWORD expr?
 
 varAssignment ::= SYMBOL varAssignmentOp expr
 
-varAssignmentOp ::= PLUSEQ | MINUSEQ | GTGTEQ | LTLTEQ | ASTERISKEQ | DIVEQ
+varAssignmentOp ::= PLUSEQ | MINUSEQ | GTGTEQ | LTLTEQ | ASTERISKEQ | DIVEQ | OREQ | ANDEQ | XOREQ | PERCEQ
 
 switchCase ::= CASE_KEYWORD expr COLON block
 
 defaultSwitchCase ::= DEFAULT_KEYWORD COLON block
 
-expr ::= call_expr_r | ternary_expr_r | parened_expr_r | binop_expr_r | unop_expr_r | literal_expr_r | term_expr_r | index_expr_r
+expr ::= call_expr_r | ternary_expr_r | parened_expr_r | unop_expr_r | binop_expr_r | index_expr_r | literal_expr_r | term_expr_r
 
 ternary_expr_r ::= expr QUEST expr COLON expr
 
@@ -206,11 +213,11 @@ index_expr_r ::= expr LBRACKET expr RBRACKET
 
 binop_expr_r ::= expr binop expr
 
-call_expr_r ::= SYMBOL LPAREN <<comma_list expr>>? RPAREN
+call_expr_r ::= SYMBOL (LT type_expr GT)? LPAREN <<comma_list expr>>? RPAREN
 
-binop ::= OROR | ANDAND | EQEQ | NE | LE | LTLT | LT | GE | GTGT | GT | EQ | PLUS | MINUS | ASTERISK | DIV | PERC | DOT
+binop ::= DOT | EQEQ | NE | LE | LTLT | LT | GE | GTGT | GT | PLUS | MINUS | ASTERISK | DIV | OR | AND | PERC | OROR | ANDAND | EQ
 
-unop_expr_r ::= increm_expr_r | PLUS expr | MINUS expr | EXCL expr | SIZEOF_KEYWORD LPAREN expr RPAREN
+unop_expr_r ::= increm_expr_r | PLUS expr | MINUS expr | EXCL expr | SIZEOF_KEYWORD LPAREN expr RPAREN | NEW_KEYWORD call_expr_r
 
 increm_expr_r ::= pre_increm_expr_r | post_increm_expr_r
 
@@ -226,6 +233,7 @@ funcenumDeclaration ::= FUNCENUM_KEYWORD SYMBOL LBRACE funcenumBlock RBRACE
 funcenumBlock ::= <<optional_comma_list funcenumBlockDeclaration>>
 funcenumBlockDeclaration ::= SYMBOL? PUBLIC_KEYWORD LPAREN functionParameterList? RPAREN
 
+meta dot_list ::= <<param>> (DOT <<param>>)*
 meta comma_list ::= <<param>> (COMMA <<param>>)*
 meta optional_comma_list ::= <<param>> (COMMA <<param>>)* COMMA?
 
@@ -236,18 +244,22 @@ argdecl ::= arg_new
 arg_new ::= CONST_KEYWORD? type_expr AND? SYMBOL old_dims? (EQ arg_init)?
 arg_init ::= literal | SYMBOL
 
-vardecl ::= var_prefix? type_expr? SYMBOL old_dims? (EQ NEW_KEYWORD? expr)? (COMMA SYMBOL old_dims? (EQ NEW_KEYWORD? expr)?)* SEMICOLON
+vardecl ::= var_prefix* type_expr? SYMBOL old_dims? (EQ NEW_KEYWORD? expr)? (COMMA SYMBOL old_dims? (EQ NEW_KEYWORD? expr)?)* SEMICOLON
 var_prefix ::= STATIC_KEYWORD | CONST_KEYWORD
 
-global ::= storage_class* type_expr new_dims? SYMBOL
+global ::= global_old | global_new
+
+global_new ::= storage_class* type_expr new_dims? SYMBOL
+
+global_old ::= storage_class* type_expr SYMBOL old_dims*
 
 storage_class ::= PUBLIC_KEYWORD | STATIC_KEYWORD | CONST_KEYWORD | STOCK_KEYWORD | NATIVE_KEYWORD
 
 type_expr ::= (builtin_type | SYMBOL) new_dims?
 builtin_type ::= VOID_KEYWORD | INT_KEYWORD | FLOAT_KEYWORD | CHAR_KEYWORD | BOOL_KEYWORD | ANY_KEYWORD
 
-new_dims ::= (LBRACKET RBRACKET)*
-old_dims ::= (LBRACKET expr? RBRACKET)+
+new_dims ::= (LBRACKET RBRACKET)+
+old_dims ::= (LBRACKET expr RBRACKET)+
 
 literal_expr_r ::= number | bool_literal | string_literal | character_literal
 number ::= integer_literal | hex_literal | float_literal
@@ -255,24 +267,29 @@ number ::= integer_literal | hex_literal | float_literal
 visibility ::= PUBLIC_KEYWORD
 method-args ::= arg_new* ELLIPSIS?
 
-methodmap ::= METHODMAP_KEYWORD SYMBOL? LBRACE methodmap-item* RBRACE SEMICOLON?
+methodmap ::= METHODMAP_KEYWORD SYMBOL (LT SYMBOL)? LBRACE methodmap-item* RBRACE SEMICOLON?
 methodmap-item ::=
-           visibility TILDE? SYMBOL LPAREN RPAREN EQ SYMBOL SEMICOLON
-        | visibility NATIVE_KEYWORD type_expr TILDE? SYMBOL methodmap_symbol LPAREN method-args RPAREN
-        | visibility type_expr SYMBOL LPAREN method-args RPAREN func-body
-        | "property" type_expr SYMBOL { property-decl }
+           visibility? TILDE? SYMBOL LPAREN RPAREN EQ SYMBOL SEMICOLON
+        | visibility? NATIVE_KEYWORD type_expr TILDE? SYMBOL LPAREN <<comma_list method-args>> RPAREN SEMICOLON
+        | visibility? type_expr SYMBOL LPAREN <<comma_list method-args>> RPAREN block
+        | PROPERTY_KEYWORD type_expr SYMBOL { property-decl }
 property-func ::= GET_KEYWORD | SET_KEYWORD
 property-decl ::= visibility property-impl
 property-impl ::=
-           "native" property-func LPAREN RPAREN
-         | property-func LPAREN RPAREN func-body
-         | property-func LPAREN RPAREN "=" SYMBOL
+           NATIVE_KEYWORD property-func LPAREN RPAREN
+         | property-func LPAREN RPAREN block
+         | property-func LPAREN RPAREN EQ SYMBOL SEMICOLON
 
-enum-struct ::= ENUM_KEYWORD STRUCT_KEYWORD SYMBOL LBRACE SPACE? enum-struct-entry enum-struct-entry* RBRACE SEMICOLON?
+enum-struct ::= ENUM_KEYWORD STRUCT_KEYWORD SYMBOL LBRACE enum-struct-entry+ RBRACE SEMICOLON?
 enum-struct-entry ::= enum-struct-field
                     | enum-struct-method
-enum-struct-field ::= type_expr SYMBOL old_dims?
-enum-struct-method ::= type_expr SYMBOL LPAREN method-args RPAREN functionBlock SEMICOLON?
+enum-struct-field ::= type_expr SYMBOL old_dims? SEMICOLON
+enum-struct-method ::= type_expr SYMBOL LPAREN method-args RPAREN block SEMICOLON? // was functionBlock instead of block, unsure why
+
+enum-block ::= ENUM_KEYWORD SYMBOL LBRACE <<comma_list enum-block-entry>> RBRACE SEMICOLON
+enum-block-entry ::= SYMBOL (EQ number)?
+
+using ::= USING_KEYWORD <<dot_list SYMBOL>> SEMICOLON
 
 typedef ::= TYPEDEF_KEYWORD SYMBOL EQ full-type-expr
 full-type-expr ::= LPAREN type_expr RPAREN
