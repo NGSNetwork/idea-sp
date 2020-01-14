@@ -26,14 +26,14 @@ EOL="\n"|"\r\n"
 LINE_WS=[ \t\f]
 WHITE_SPACE=({LINE_WS}|{EOL})+
 
-SPACE=[ \n\r\t\f]
+SPACE=[\s]
 LINE_COMMENT="//"[^\r\n]*
 BLOCK_COMMENT=\/\*~(\*\/)
 PREPROCESSOR_COMMENT=#(assert|define|else|elseif|endif|endinput|error|file|if|include|line|pragma|section|tryinclude|undef)[^\r\n]*
-INTEGER_LITERAL=[-+]?[0-9][_\d]*
-FLOAT_LITERAL=[-+]?[0-9][_\d]*\.[0-9][_\d]*(e[-+]?[0-9]+)?
-HEX_LITERAL=[-+]?0x[a-fA-F0-9_]+
-BINARY_LITERAL=[-+]?0b[01_]+
+INTEGER_LITERAL=[0-9][_\d]*
+FLOAT_LITERAL=[0-9][_\d]*\.[0-9][_\d]*(e[-+]?[0-9]+)?
+HEX_LITERAL=0x[a-fA-F0-9_]+
+BINARY_LITERAL=0b[01_]+
 STRING_LITERAL=\"(\\.|[^\"])*\"
 CHARACTER_LITERAL='(\\.|[^\"])'
 SYMBOL=([@_a-zA-Z][@_a-zA-Z0-9]+|[a-zA-Z][@_a-zA-Z0-9]*)
@@ -101,7 +101,6 @@ SWITCH_KEYWORD="switch"
 WHILE_KEYWORD="while"
 
 DEFINED_KEYWORD="defined"
-SIZEOF_KEYWORD="sizeof"
 STATE_KEYWORD="state"
 TAGOF_KEYWORD="tagof"
 
@@ -135,7 +134,7 @@ PROPERTY_KEYWORD="property"
 TRUE_KEYWORD="true"
 FALSE_KEYWORD="false"
 
-//SPACE="regexp:[ \n\r\t\f]"
+SPACE="regexp:[\s]"
 
 //line_comment="regexp://[^\r\n]*"
 //block_comment="regexp:/\*~(\*/)"
@@ -230,7 +229,6 @@ FALSE_KEYWORD="false"
   "switch"                    { return SourcePawnTypes.SWITCH_KEYWORD; }
   "while"                     { return SourcePawnTypes.WHILE_KEYWORD; }
   "defined"                   { return SourcePawnTypes.DEFINED_KEYWORD; }
-  "sizeof"                    { return SourcePawnTypes.SIZEOF_KEYWORD; }
   "tagof"                     { return SourcePawnTypes.TAGOF_KEYWORD; }
   "const"                     { return SourcePawnTypes.CONST_KEYWORD; }
   "forward"                   { return SourcePawnTypes.FORWARD_KEYWORD; }
@@ -252,7 +250,7 @@ FALSE_KEYWORD="false"
   "void"                      { return SourcePawnTypes.VOID_KEYWORD; }
   "any"                       { return SourcePawnTypes.ANY_KEYWORD; }
 
-  {SPACE}                     { return SourcePawnTypes.SPACE; }
+//  {SPACE}                     { return SourcePawnTypes.SPACE; }
   {INTEGER_LITERAL}           { return SourcePawnTypes.INTEGER_LITERAL; }
   {FLOAT_LITERAL}             { return SourcePawnTypes.FLOAT_LITERAL; }
   {HEX_LITERAL}               { return SourcePawnTypes.HEX_LITERAL; }

@@ -25,6 +25,6 @@ class SourcePawnColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName() = "SourcePawn"
 
     companion object {
-        private val DESCRIPTORS = arrayOf(AttributesDescriptor("Operator", SourcePawnSyntaxHighlighter.OPERATOR), AttributesDescriptor("Literal", SourcePawnSyntaxHighlighter.LITERAL), AttributesDescriptor("Reserved", SourcePawnSyntaxHighlighter.RESERVED), AttributesDescriptor("Comment", SourcePawnSyntaxHighlighter.COMMENT))
+        private val DESCRIPTORS = arrayOf(AttributesDescriptor("Operator", SourcePawnSyntaxHighlighter.OPERATOR), AttributesDescriptor("Literal", SourcePawnSyntaxHighlighter.LITERAL), AttributesDescriptor("Reserved", SourcePawnSyntaxHighlighter.RESERVED), AttributesDescriptor("Comment", SourcePawnSyntaxHighlighter.COMMENT), AttributesDescriptor("Identifier", SourcePawnSyntaxHighlighter.IDENTIFIER))
     }
 }
